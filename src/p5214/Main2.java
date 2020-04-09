@@ -6,11 +6,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class Main2 {
-	static int N;//총 역수
-	static int K;//링크 연결 역수
-	static int M;//링크 수
+	static int N; //역의 개수
+	static int K; //연결 역의 수
+	static int M; // 전체 튜브 수
 	static int LINK[][];
 	static int MAP[][];
+	static int DIST[];
 	public static int minDistance() {
 		for(int i=1;i<=M;i++) {
 			for(int j=1;j<=K;j++) {
@@ -25,13 +26,12 @@ public class Main2 {
 		}
 		
 		
-		for(int j=1;j<=N;j++) {
-			for(int k=1;k<=N;k++) {
-				System.out.print(MAP[j][k]+" ");
+		for(int i=2;i<=N;i++) {
+			for(int j=1;j<=N;j++) {
+				DIST[i] = Math.min(DIST[i], DIST[j]+MAP[j][i]);
 			}
-			System.out.println();
 		}
-		return 0;
+		return DIST[N]+1;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -42,8 +42,11 @@ public class Main2 {
 		M = Integer.parseInt(st.nextToken());
 		LINK = new int[M+1][K+1];
 		MAP = new int[N+1][N+1];
+		DIST = new int[N+1];
+		Arrays.fill(DIST, N+1);
+		DIST[1] = 0;
 		for(int i=1;i<=N;i++) {
-			Arrays.fill(MAP[i], Integer.MAX_VALUE);
+			Arrays.fill(MAP[i], N+1);
 		}
 		for(int i=1;i<=M;i++) {
 			st = new StringTokenizer(br.readLine());
@@ -51,6 +54,6 @@ public class Main2 {
 				LINK[i][j] = Integer.parseInt(st.nextToken());
 			}
 		}
-		minDistance();
+		System.out.println(minDistance());
 	}
 }
