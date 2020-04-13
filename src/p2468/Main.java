@@ -2,118 +2,112 @@ package p2468;
 import java.util.*;
 import java.io.*;
 
-class Node{
+class Node {
 	int x;
 	int y;
-	int id;
-	
-	public Node(int x, int y, int id) {
-		this.x = x;
-		this.y = y;
-		this.id = id;
-	}
-	
+
 	public Node(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.id = 0;
 	}
 }
 
-
 public class Main {
-	static int N;
-	static int MAP[][];
-	static int FLOOD[][];
-	static int MAX = Integer.MIN_VALUE;
-	static ArrayList<Integer> NUMBS;
-	static int dx[] = {0, -1, 0, 1};
-	static int dy[] = {-1, 0, 1, 0};
+static int N;
+static int MAP[][];
+static int FLOOD[][];
+static int MAX = Integer.MIN_VALUE;
+static int MIN = Integer.MAX_VALUE;
+static ArrayList<Integer> NUMBS;
+static int dx[] = {0, -1, 0, 1};
+static int dy[] = {-1, 0, 1, 0};
+static int answer = Integer.MIN_VALUE;
+static Queue<Node> Land;
+
+public static void main(String[] args) throws IOException {
+	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	StringTokenizer st;
+	N = Integer.parseInt(br.readLine());
+	MAP = new int[N+1][N+1];
+	FLOOD = new int[N+1][N+1];
 	
-	public static void printMap() {
-		for(int i=1;i<=N;i++) {
-			for(int j=1;j<=N;j++) {
-				System.out.print(FLOOD[i][j]+" ");
+	for(int i=1;i<=N;i++) {
+		st = new StringTokenizer(br.readLine());
+		for(int j=1;j<=N;j++) {
+			MAP[i][j] = Integer.parseInt(st.nextToken());
+			if(MAP[i][j]>MAX) {
+				MAX = MAP[i][j];
 			}
-			System.out.println();
+			if(MAP[i][j]<MIN) {
+				MIN = MAP[i][j];
+			}
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		N = Integer.parseInt(br.readLine());
-		MAP = new int[N+1][N+1];
-		FLOOD = new int[N+1][N+1];
-		
-		for(int i=1;i<=N;i++){
-			st = new StringTokenizer(br.readLine());
-			for(int j=1;j<=N;j++) {
-				MAP[i][j] = Integer.parseInt(st.nextToken());
-				if(MAP[i][j] > MAX) {
-					MAX = MAP[i][j];
-				}
-			}
-		}
-		BFS();
-		
+	for(int i=MIN-1;i<=MAX;i++) {
+		safeLand(i);
 	}
 	
-	private static void BFS() {
-		int countMax = Integer.MIN_VALUE;
-		for(int i=1;i<MAX;i++) {
-			NUMBS = new ArrayList<Integer>();
-			Queue<Node> Land = new LinkedList<Node>();
-			int newId = 1;
-			//System.out.println("level"+i+": ");
-			for(int j=1;j<=N;j++) {
-				Arrays.fill(FLOOD[j], 0);
-				for(int k=1;k<=N;k++) {
-					if(MAP[j][k] > i) {
-						Land.add(new Node(j,k,newId));
-						FLOOD[j][k] = newId++;
-					}
+	System.out.println(answer);
+}
+
+public static void safeLand(int level) {
+	int tempAnswer = 0;
+	Land = new LinkedList<Node>();
+	
+	for(int i=1;i<=N;i++) {
+		for(int j=1;j<=N;j++) {
+			if(MAP[i][j]>level) {
+				FLOOD[i][j] = 0;
+			}else {
+				FLOOD[i][j] = 1;
+			}
+		}
+	}
+	for(int i=1;i<=N;i++) {
+		for(int j=1;j<=N;j++) {
+			if(FLOOD[i][j] == 0) {
+				Land.offer(new Node(i,j));
+				FLOOD[i][j] = 1;
+				tempAnswer++;
+				DFS(i, j);
+				//BFS();
+			}
+		}
+	}
+	if(tempAnswer > answer) {
+		answer = tempAnswer;
+	}
+}
+
+public static void BFS() {
+	while(!Land.isEmpty()) {
+		Node land = Land.poll();
+		for(int k=0;k<4;k++) {
+			int nx = land.x+dx[k];
+			int ny = land.y+dy[k];
+			if(nx>0 && nx<N+1 && ny>0 && ny<N+1) {
+				if(FLOOD[nx][ny]==0) {
+					FLOOD[nx][ny] = 1;
+					Land.offer(new Node(nx, ny));
 				}
 			}
-			//printMap();
-			while(!Land.isEmpty()){
-				Node land = Land.poll();
-				int id = land.id;
-				
-				if(FLOOD[land.x][land.y]!=id) {
-					continue;
-				}
-				for(int d=0;d<4;d++) {
-					int newX = land.x+dx[d];
-					int newY = land.y+dy[d];
-					if(newX>0 && newX<N+1 && newY>0 && newY<N+1) {
-						if(FLOOD[newX][newY] != 0) {
-							if(FLOOD[newX][newY] > id) {
-								FLOOD[newX][newY] = id;
-								Land.offer(new Node(newX, newY, id));
-							}
-						}
-					}
-				}
-			}
-			
-			for(int j=1;j<=N;j++) {
-				for(int k=1;k<=N;k++) {
-					if(FLOOD[j][k] > 0 && !NUMBS.contains(FLOOD[j][k])) {
-						NUMBS.add(FLOOD[j][k]);
-					}
-				}
-			}
-			//System.out.println(NUMBS.size());
-			if(NUMBS.size()>countMax) {
-				countMax= NUMBS.size();
-			}
-			//printMap();
 		}
 		
-		 
-		 
-		System.out.println(countMax);
 	}
+}
+
+public static void DFS(int x, int y) {
+	for(int k=0;k<4;k++) {
+		int nx = x+dx[k];
+		int ny = y+dy[k];
+		if(nx>0 && nx<N+1 && ny>0 && ny<N+1) {
+			if(FLOOD[nx][ny]==0) {
+				FLOOD[nx][ny] = 1;
+				DFS(nx, ny);
+			}
+		}
+	}
+}
 
 }

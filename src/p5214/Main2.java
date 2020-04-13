@@ -13,19 +13,6 @@ public class Main2 {
 	static int MAP[][];
 	static int DIST[];
 	public static int minDistance() {
-		for(int i=1;i<=M;i++) {
-			for(int j=1;j<=K;j++) {
-				for(int k=1;k<=K;k++) {
-					if(j==k) {
-						MAP[LINK[i][j]][LINK[i][k]] = 0;
-					}else {
-						MAP[LINK[i][j]][LINK[i][k]] = 1;
-					}
-				}
-			}
-		}
-		
-		
 		for(int i=2;i<=N;i++) {
 			for(int j=1;j<=N;j++) {
 				DIST[i] = Math.min(DIST[i], DIST[j]+MAP[j][i]);
@@ -54,6 +41,19 @@ public class Main2 {
 				LINK[i][j] = Integer.parseInt(st.nextToken());
 			}
 		}
+		
+		for(int i=1;i<=M;i++) {
+			for(int j=1;j<=K;j++) {
+				for(int k=1;k<=K;k++) {
+					if(j==k) {
+						MAP[LINK[i][j]][LINK[i][k]] = 0;
+					}else {
+						MAP[LINK[i][j]][LINK[i][k]] = 1;
+					}
+				}
+			}
+		}
+		LINK = new int[1][1];
 		System.out.println(minDistance());
 	}
 }
