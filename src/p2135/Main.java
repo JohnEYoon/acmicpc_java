@@ -4,44 +4,74 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class Main {
-	public static String RLE(String word) {
-		int N = word.length();
-		String temp;
-		for(int i=0;i<N;i++) {
-			for(int j=i+1;j<N;j++) {
-				if((N-j)<(j-i)) {
+	public static boolean compressionCheck(String word) {
+		for(int i=0;i<word.length()-1;i++) {
+			int length = 0;
+			for(int j=i+1;j<word.length();j++) {
+				length = j-i;
+				if(length+j > word.length()) {
 					break;
 				}
 				if(word.charAt(i) == word.charAt(j)) {
-					if(word.substring(i, j).equals(word.substring(j, 2*j-i))) {
-						temp = word.substring(i,j);
+					if(word.substring(i, j).equals(word.substring(j, j+length))){
+						String temp = word.substring(i, j);
+						int startIdx = j;
+						int endIdx = j+length;
 						int count = 2;
-						int startIdx = 2*j-i;
-						int length = j-i;
-						int endIdx = startIdx + length;
-						while(true) {
-							if(endIdx>N) {
-								endIdx -= length;
-								break;
+						while(endIdx+length<=word.length()) {
+							if(temp.equals(word.substring(startIdx+length, endIdx+length))) {
+								startIdx += length;
+								endIdx += length;
+								count++;
 							}else {
-								if(temp.equals(word.substring(startIdx, endIdx))){
-									count++;
-									startIdx += length;
-									endIdx += length;
-								}else {
-									endIdx -= length;
-									break;
-								}
+								break;
 							}
 						}
-						
-						if((word.substring(0, i)+count+"("+word.substring(i, j)+")"+word.substring(endIdx)).length() <= word.length() ) {
-							return word.substring(0, i)+count+"("+RLE(word.substring(i, j))+")"+RLE(word.substring(endIdx));
+						if(word.length() > (word.substring(0, i)+count+"("+temp+")"+word.substring(endIdx)).length()) {
+							return true;
+						}else {
+							return false;
 						}
-						return word.substring(0, endIdx)+RLE(word.substring(endIdx));
 					}
 				}
 			}
+			
+		}
+		return false;
+	}
+	
+	public static String RLE(String word) {
+		for(int i=0;i<word.length()-1;i++) {
+			int length = 0;
+			for(int j=i+1;j<word.length();j++) {
+				length = j-i;
+				if(length+j > word.length()) {
+					break;
+				}
+				if(word.charAt(i) == word.charAt(j)) {
+					if(word.substring(i, j).equals(word.substring(j, j+length))){
+						String temp = word.substring(i, j);
+						int startIdx = j;
+						int endIdx = j+length;
+						int count = 2;
+						while(endIdx+length<=word.length()) {
+							if(temp.equals(word.substring(startIdx+length, endIdx+length))) {
+								startIdx += length;
+								endIdx += length;
+								count++;
+							}else {
+								break;
+							}
+						}
+						if(word.length() > (word.substring(0, i)+count+"("+temp+")"+word.substring(endIdx)).length()) {
+							return word.substring(0, i)+count+"("+temp+")"+RLE(word.substring(endIdx));
+						}else {
+							return word.substring(0, endIdx)+RLE(word.substring(endIdx));
+						}
+					}
+				}
+			}
+			
 		}
 		return word;
 	}
@@ -49,8 +79,11 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String word = br.readLine();
-		
-		System.out.println(RLE(word));
+		while(compressionCheck(word)) {
+			word = RLE(word);
+		}
+		System.out.println(word);
+		System.out.println(word.length());
 	}
 
 }
